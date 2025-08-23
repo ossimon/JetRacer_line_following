@@ -179,9 +179,11 @@ class Robot:
             "D - right\n"
             "S - stop\n"
             "G - start episode\n"
+            "R - redo the last run\n"
         )
         moving_speed = 0.5
         steering_angle = 1
+        self.redo = False
         while True:
             speed = 0.0
             steering = 0.0
@@ -195,13 +197,14 @@ class Robot:
                 steering -= steering_angle
             if keyboard.is_pressed('g'):
                 break
+            if keyboard.is_pressed('r'):
+                self.redo = True
+                break
             self.set_controls_without_validation(speed, steering)
 
             time.sleep(0.1)
 
     def run(self, algorithm, episode):
-        self.get_input()
-
         # Load robot configuration from JSON file
         try:
             with open("robot_config.json", "r") as f:
@@ -212,7 +215,7 @@ class Robot:
             print(f"Error parsing config.json: {e}. Using default configuration.")
 
 
-        print(f"[Notification]: Starting episode {episode + 1}.")
+        print(f"[Notification]: Starting episode {episode}.")
 
         # usr_input = input("Send 's' to start.")
         # while usr_input.lower() != 's':
@@ -247,22 +250,37 @@ class Robot:
             
         total_time = time.time() - self.start
         offset_mse = np.mean(np.square(self.offsets))
-        total_reward = self.total_distance * (1 / offset_mse) if offset_mse > 0 else 0
+        part_of_track_completed = min(1, self.total_distance / 11)  # Assuming track length is 11 meters
+        avg_speed = self.total_distance / total_time if total_time > 0 else 0
+        total_reward = 0.5 * part_of_track_completed + 0.3 * avg_speed + 0.2 * (1 - offset_mse)
+        # total_reward = self.total_distance * (1 / offset_mse) if offset_mse > 0 else 0
 
-        print(f"[Notification]: Episode {episode + 1} ended.\n"
-              f"Total time: {total_time:.2f} seconds\n"
-              f"Total distance: {self.total_distance:.2f} meters**\n"
-              f"Average offset MSE: {offset_mse:.4f}\n"
-              f"Total reward: {total_reward:.2f}"
+        print(f"[Notification]: Episode {episode} ended.\n"
+              f"\tTotal time: {total_time:.2f} seconds\n"
+              f"\tTotal distance: {self.total_distance:.2f} meters**\n"
+              f"\tPart of track completed: {part_of_track_completed:.2f}\n"
+              f"\tAverage speed: {avg_speed:.2f} m/s\n"
+              f"\tOffset MSE: {offset_mse:.4f}\n"
+              f"\tTotal reward: {total_reward:.2f}!"
         )
 
         # Reset robot position and rotation for the next episode
         self.reset_robots_position_and_rotation()
         if self.config["record_cam"]:
-            print(f"[Notification]: Saving recorded frames for episode {episode + 1}.")
+            print(f"[Notification]: Saving recorded frames for episode {episode}.")
             self.save_recorded_frames()
 
-        cv2.imwrite(f"debug_images/frame.png", self.last_frame)
-        cv2.imwrite(f"debug_images/track.png", self.last_extracted_track)
+        # cv2.imwrite(f"debug_images/frame.png", self.last_frame)
+        # cv2.imwrite(f"debug_images/track.png", self.last_extracted_track)
 
-        return total_reward, self.total_distance, offset_mse, total_time
+        if self.total_distance < 0.1:
+            self.redo = True
+        else:
+            self.get_input()
+
+        if self.redo:
+            print("[Notification]: Redoing the last run as per user request.")
+            self.redo = False
+            return self.run(algorithm, episode)
+
+        return total_reward, self.total_distance, offset_mse, total_time, part_of_track_completed, avg_speed
