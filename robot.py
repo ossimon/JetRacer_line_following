@@ -113,8 +113,18 @@ class Robot:
         return True
     
     def set_controls_without_validation(self, speed_adjustment, steering_adjustment):
-        self.steering_servo.angle = (steering_adjustment + 1) * 90
-        self.throttle_motor.throttle = speed_adjustment
+
+        for i in range(10):
+            attempts = i + 1
+            try:
+                self.steering_servo.angle = (steering_adjustment + 1) * 90
+                self.throttle_motor.throttle = speed_adjustment
+                break  # Exit loop if successful
+            except Exception as e:
+                print(f"Error setting controls: {e}")
+                time.sleep(0.1)
+        if attempts == 10:
+            print(f"[Error]: Failed to set controls after {attempts} attempts. Using last known values.")
         self.speed = speed_adjustment
         # print(f"Set steering angle to {(steering_adjustment + 1) * 90} and throttle to {speed_adjustment}")
 
@@ -202,7 +212,7 @@ class Robot:
                 break
             self.set_controls_without_validation(speed, steering)
 
-            time.sleep(0.1)
+            time.sleep(0.05)
 
     def run(self, algorithm, episode):
         # Load robot configuration from JSON file

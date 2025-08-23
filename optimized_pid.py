@@ -137,7 +137,7 @@ if __name__ == "__main__":
     optimizer = BayesianOptimizer(pid_algorithm, robot, genotype_bounds, x0=x0)
 
     try:
-        best_genotype = optimizer.train(episodes=37)
+        best_genotype = optimizer.train(episodes=11)
         print(f"Best genotype found: {best_genotype}")
     except KeyboardInterrupt:
         print("Training interrupted by user.")
