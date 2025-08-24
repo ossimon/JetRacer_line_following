@@ -247,7 +247,10 @@ class Robot:
         self.total_distance = 0.0
 
         while is_on_track:
+            # start = time.time()
             speed_adjustment, steering_adjustment = algorithm.calculate_adjustments(observation)
+            # end = time.time()
+            # print(f"[Notification]: Adjustment calculation time: {(end - start)*1000:.2f} ms")
             self.set_controls(speed_adjustment, steering_adjustment)
 
             observation = self.get_observation()

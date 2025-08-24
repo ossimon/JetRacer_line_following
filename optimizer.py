@@ -37,6 +37,9 @@ class BayesianOptimizer:
                     genotype = [float(x) for x in parts[2].strip("[]").split(", ")]
                     self.y0.append(-1 * reward)
                     self.x0.append(genotype)
+                    
+        self.episode = len(self.x0)
+
         if len(self.x0) == 0:
             self.x0 = x0
             self.y0 = None
@@ -45,7 +48,7 @@ class BayesianOptimizer:
             # print(f"[Notification]: x0: {self.x0}")
             # print(f"[Notification]: y0: {self.y0}")
 
-        self.episode = len(self.x0)
+        
 
         self.last_timestamp = time()
 

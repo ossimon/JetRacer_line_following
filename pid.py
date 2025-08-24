@@ -67,8 +67,9 @@ class PidController:
 
     def train(self, episodes):
         for episode in range(episodes):
-            self.robot.run(self, episode)
-
+            total_reward, total_distance, offset_mse, total_time, part_of_track_completed, avg_speed = self.robot.run(self, episode)
+            with open("pid_results.csv", "a") as f:
+                f.write(f"{episode};{total_reward};{total_time};{part_of_track_completed};{avg_speed};{offset_mse}\n")
 
 if __name__ == "__main__":
     # Define PID configuration
@@ -85,6 +86,7 @@ if __name__ == "__main__":
     controller = PidController(robot, config)
 
     try:
+        controller.robot.get_input()
         controller.train(episodes=50)
     except KeyboardInterrupt:
         print("Training interrupted by user.")
