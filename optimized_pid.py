@@ -29,7 +29,7 @@ class PidAlgorithm:
         self.genotype = None
         self.prev_offset = 0
         self.prev_direction = 0
-        self.name = "PID"
+        self.name = "ZIGZAG_PID"
 
     def set_genotype(self, genotype):
         self.genotype = genotype
@@ -130,14 +130,15 @@ if __name__ == "__main__":
     }
     genotype_bounds = [genotype_bounds[key] for key in sorted(genotype_bounds.keys())]
 
-    x0 = [0.9229231752127518, 0.003104307638119864, 0.3939221095436195, 0.24812083376742416, 0.09756437302332513, 0.24176753896760922, 0.5513373507305395, 0.1781432853226739, 0.03405578276421895, 0.6237322830438287, 0.96674476411587, 0.40682901438372887]
+    # x0 = [1.0, 0.0, 0.15887545130553657, 1.0, 1.0, 1.0, 0.0, 0.4577838441739256, 0.27892012944646477, 0.5862939096291998, 1.0, 1.0]
+    x0 = None
 
     # Initialize PID algorithm
     pid_algorithm = PidAlgorithm()
     optimizer = BayesianOptimizer(pid_algorithm, robot, genotype_bounds, x0=x0)
 
     try:
-        best_genotype = optimizer.train(episodes=11)
+        best_genotype = optimizer.train(episodes=89)
         print(f"Best genotype found: {best_genotype}")
     except KeyboardInterrupt:
         print("Training interrupted by user.")

@@ -28,7 +28,7 @@ class PidController:
         dt = max(self.dt, 1e-3)          # set self.dt once (e.g., 0.05)
 
         # blended error: lateral + heading
-        error = 0.7  * (-track_offset) + 0.3 * (-track_direction)
+        error = 0.6  * (-track_offset) + 0.4 * (-track_direction)
 
         # derivative with simple low-pass filter
         raw_d = (error - self.prev_error) / dt
@@ -58,7 +58,7 @@ class PidController:
         self.prev_error = error
 
         # throttle strategy: slow down for sharp turns
-        base = 1
+        base = 0.8
         throttle = max(0.2, base - 0.35*abs(steering))
         return throttle, steering
     

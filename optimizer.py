@@ -24,6 +24,13 @@ class BayesianOptimizer:
         self.best_genotype = None
         self.best_reward = float('-inf')
 
+        if x0 is not None:
+            self.x0 = x0
+            self.y0 = None
+            self.episode = 0
+            self.last_timestamp = time()
+            return
+
         # try to read existing results
         self.x0 = []
         self.y0 = []
@@ -47,8 +54,6 @@ class BayesianOptimizer:
             print(f"[Notification]: Loaded {len(self.x0)} existing evaluations from {self.algorithm.name}_training_results.csv")
             # print(f"[Notification]: x0: {self.x0}")
             # print(f"[Notification]: y0: {self.y0}")
-
-        
 
         self.last_timestamp = time()
 
