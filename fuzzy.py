@@ -145,15 +145,15 @@ class FuzzyAlgorithm:
         mfs = mf_genotype_to_membership_functions(genotype[:10])
 
 
-        # rules = get_full_rules(
-        #     speed_rules=genotype[10:23],
-        #     steer_rules=genotype[23:36]
-        # )
-        fixed_rules = [3, 1, 4, 2, 4, 0, 2, 4, 2, 2, 2, 3, 4, 0, 1, 1, 1, 2, 0, 0, 1, 3, 4, 1, 1, 2]
         rules = get_full_rules(
-            speed_rules=fixed_rules[:13],
-            steer_rules=fixed_rules[13:26]
+            speed_rules=genotype[10:23],
+            steer_rules=genotype[23:36]
         )
+        # fixed_rules = [3, 1, 4, 2, 4, 0, 2, 4, 2, 2, 2, 3, 4, 0, 1, 1, 1, 2, 0, 0, 1, 3, 4, 1, 1, 2]
+        # rules = get_full_rules(
+        #     speed_rules=fixed_rules[:13],
+        #     steer_rules=fixed_rules[13:26]
+        # )
 
         if self.fast:
             self.fuzzy_system = VectorizedFuzzyEvaluator(mfs, rules, res=FUZZY_RES)
@@ -173,9 +173,6 @@ class FuzzyAlgorithm:
             steer = float(self.fuzzy_system.output.get("steer", 0.0))
         # end = time()
         # print(f"[Notification]: Fuzzy compute time: {(end - start)*1000:.2f} ms")
-
-        steer *= 2
-        steer = max(-1.0, min(1.0, steer))
 
         return speed, -steer
 
@@ -228,17 +225,17 @@ if __name__ == "__main__":
     robot = Robot()
 
     x0 = [0.138660735238939, 0.005509326201965648, 0.965874633372737, 0.8908060430965608, 0.42972621981401515, 0.31726908875999077, 0.07264698209032718, 0.12101531617352726, 0.5757991366771309, 0.8159217712038822, 3, 1, 4, 2, 4, 0, 2, 4, 2, 2, 2, 3, 4, 0, 1, 1, 1, 2, 0, 0, 1, 3, 4, 1, 1, 2]
-    # x0 = None
+    x0 = None
 
     # Initialize fuzzy algorithm
     pid_algorithm = FuzzyAlgorithm(fast=True)
     genotype_bounds = [(float(lb), float(ub)) for lb, ub in mf_bounds] + \
         loosen_rule_bounds(speed_rule_bounds) + \
         loosen_rule_bounds(steer_rule_bounds)
-    optimizer = BayesianOptimizer(pid_algorithm, robot, genotype_bounds, x0=x0)
+    optimizer = BayesianOptimizer(pid_algorithm, robot, genotype_bounds, x0=x0, optimization_method='gbrt')
 
     try:
-        best_genotype = optimizer.train(episodes=90)
+        best_genotype = optimizer.train(episodes=100)
         print(f"Best genotype found: {best_genotype}")
     except KeyboardInterrupt:
         print("Training interrupted by user.")

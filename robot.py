@@ -52,6 +52,7 @@ class Robot:
         print("Throttle motor initialized")
 
         self.camera = CSICamera(width=1280, height=720, capture_fps=120)
+        self.camera.running = True
 
         time.sleep(0.2)  # let first frame arrive
         print("CSI camera initialized")
@@ -82,7 +83,8 @@ class Robot:
         self.extracted_tracks = []
 
     def get_observation(self):
-        frame = self.camera.read()
+        # frame = self.camera.read()
+        frame = self.camera.value
         self.last_frame = frame  # Store the last frame for later use
         if frame is None:
             print("Warning: camera returned no frame")
@@ -263,7 +265,7 @@ class Robot:
             
         total_time = time.time() - self.start
         offset_mse = np.mean(np.square(self.offsets))
-        part_of_track_completed = min(1, self.total_distance / 2.7)  # Assuming track length is 11 meters
+        part_of_track_completed = min(1, self.total_distance / 11)  # Assuming track length is 11 meters
         avg_speed = self.total_distance / total_time if total_time > 0 else 0
         total_reward = 0.5 * part_of_track_completed + 0.3 * avg_speed + 0.2 * (1 - offset_mse)
         # total_reward = self.total_distance * (1 / offset_mse) if offset_mse > 0 else 0
