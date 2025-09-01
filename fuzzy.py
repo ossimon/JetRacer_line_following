@@ -1,3 +1,5 @@
+print("here")
+
 import sys
 import os
 
@@ -5,8 +7,8 @@ from optimizer import BayesianOptimizer
 from robot import Robot
 
 import numpy as np
-import skfuzzy as fuzz
-from skfuzzy import control as ctrl
+# import skfuzzy as fuzz
+# from skfuzzy import control as ctrl
 
 from time import time
 
